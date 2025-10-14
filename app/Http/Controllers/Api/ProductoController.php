@@ -66,8 +66,7 @@ class ProductoController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error al crear producto',
-                'data' => $e->getMessage()
+                'message' => 'Error al crear producto'
             ], 500);
         }
     }
@@ -95,8 +94,7 @@ class ProductoController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error al obtener producto',
-                'data' => $e->getMessage()
+                'message' => 'Error al obtener producto'
             ], 500);
         }    
     
@@ -119,7 +117,7 @@ class ProductoController extends Controller
             }
 
             $validator = Validator::make($request->all(), [
-                'nombre' => 'sometimes|required|string|max:150',
+                'nombre' => 'sometimes|required|string|max:255',
                 'categoria_id' => 'sometimes|required|exists:t_categorias,id',
                 'stock' => 'sometimes|required|integer|min:0',
                 'precio' => 'sometimes|required|numeric|min:0',
@@ -129,8 +127,7 @@ class ProductoController extends Controller
             if ($validator->fails()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Errores de validación',
-                    'errors' => $validator->errors()
+                    'message' => 'Errores de validación'
                 ], 422);
             }
 
@@ -145,8 +142,7 @@ class ProductoController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error al actualizar producto',
-                'error' => $e->getMessage()
+                'message' => 'Error al actualizar producto'
             ], 500);
         }
         //
@@ -177,8 +173,7 @@ class ProductoController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error al eliminar producto',
-                'error' => $e->getMessage()
+                'message' => 'Error al eliminar producto'
             ], 500);
         }
     }
@@ -209,8 +204,7 @@ class ProductoController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error en la paginación',
-                'error' => $e->getMessage()
+                'message' => 'Error en la paginación'
             ], 500);
         }
     }
@@ -239,11 +233,70 @@ class ProductoController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error en la paginación',
-                'error' => $e->getMessage()
+                'message' => 'Error en la paginación'
             ], 500);
         }
     }
 
     // --- Final Juan_Perez ----
+
+    public function actualizarStock(Request $request, $id)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'cantidad' => 'required|integer|not_in:0'
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Errores de validación'
+                ], 422);
+            }
+
+            $producto = Producto::find($id);
+
+            if (!$producto) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Producto no encontrado'
+                ], 404);
+            }
+
+            $cantidad = $request->cantidad;
+            $stockActual = $producto->stock;
+            $operacion = '';
+
+            // Si la cantidad es MENOR que el stock actual, RESTAMOS
+            if ($cantidad < $stockActual) {
+                $producto->stock = $stockActual - $cantidad;
+                $operacion = 'resta';
+            } 
+            // Si la cantidad es MAYOR O IGUAL al stock actual, SUMAMOS
+            else {
+                $producto->stock = $stockActual + $cantidad;
+                $operacion = 'suma';
+            }
+
+            $producto->save();
+            $producto->load('categoria');
+
+            return response()->json([
+                'success' => true,
+                'message' => "Stock actualizado mediante {$operacion}",
+                'data' => [
+                    'producto' => $producto,
+                    'stock_anterior' => $stockActual,
+                    'stock_nuevo' => $producto->stock,
+                    'cantidad_operada' => $cantidad,
+                    'operacion_realizada' => $operacion
+                ]
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar stock'
+            ], 500);
+        }
+    }
 }
