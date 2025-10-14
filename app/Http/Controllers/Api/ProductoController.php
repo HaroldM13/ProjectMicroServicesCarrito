@@ -232,7 +232,7 @@ class ProductoController extends Controller
                     'per_page' => $productos->perPage(),
                     'current_page' => $productos->currentPage(),
                     'last_page' => $productos->lastPage(),
-                    'from' => $productos->firstItem(),
+                    'from' => $productos->firstItem(),    
                     'to' => $productos->lastItem()
                 ]
             ], 200);
