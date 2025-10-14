@@ -182,4 +182,68 @@ class ProductoController extends Controller
             ], 500);
         }
     }
+
+    // -- Inicio Juan_Perez ---//
+
+    // Paginacion Simple 
+    public function paginarSimple($cantidad)
+    {
+        try {
+            $productos = Producto::with('categoria')
+                ->where('estado', 'A')
+                ->paginate($cantidad);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Productos paginados',
+                'data' => $productos->items(),
+                'pagination' => [
+                    'total' => $productos->total(),
+                    'per_page' => $productos->perPage(),
+                    'current_page' => $productos->currentPage(),
+                    'last_page' => $productos->lastPage(),
+                    'from' => $productos->firstItem(),
+                    'to' => $productos->lastItem()
+                ]
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error en la paginación',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    // Paginacion avanzada
+    public function paginarAvanzada($cantidad, $pagina)
+    {
+        try {
+            $productos = Producto::with('categoria')
+                ->where('estado', 'A')
+                ->paginate($cantidad, ['*'], 'page', $pagina);
+
+            return response()->json([
+                'success' => true,
+                'message' => "Mostrando página {$pagina} con {$cantidad} productos",
+                'data' => $productos->items(),
+                'pagination' => [
+                    'total' => $productos->total(),
+                    'per_page' => $productos->perPage(),
+                    'current_page' => $productos->currentPage(),
+                    'last_page' => $productos->lastPage(),
+                    'from' => $productos->firstItem(),
+                    'to' => $productos->lastItem()
+                ]
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error en la paginación',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    // --- Final Juan_Perez ----
 }

@@ -8,3 +8,7 @@ Route::get('/user', function (Request $request) {
 });
 
 Route::apiResource('productos', ProductoController::class);
+
+// Direccion de paginaciones -- Juan_perez
+Route::get('productos/paginar/{cantidad}', [ProductoController::class, 'paginarSimple']);
+Route::get('productos/paginar/{cantidad}/pagina/{pagina}', [ProductoController::class, 'paginarAvanzada']);
